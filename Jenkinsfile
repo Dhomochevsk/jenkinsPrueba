@@ -14,7 +14,7 @@ pipeline{
         stage('Clonar Repositorio'){
             steps{
                 script{
-                    git 'https://github.com/Dhomochevsk/jenkinsRepository.git'
+                    git 'https://github.com/Dhomochevsk/jenkinsPrueba.git'
                 }
             }
         }

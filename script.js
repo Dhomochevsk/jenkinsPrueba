@@ -1,31 +1,114 @@
-// Obtener referencia al campo de texto de la pantalla
-const display = document.getElementById('display');
+const result = document.querySelector(".result");
+const buttons = document.querySelectorAll(".buttons button");
 
-// Función para agregar números o símbolos al display
-function agregarNumero(valor) {
-    display.value += valor; // Concatenar el valor en el display
+let currentNumber = "";
+let firstOperand = null;
+let operator = null;
+let restart = false;
+
+function updateResult(originClear = false) {
+  result.innerText = originClear ? 0 : currentNumber.replace(".", ",");
 }
 
-// Función para borrar el contenido del display
-function clearDisplay() {
-    display.value = ''; // Limpiar el contenido del display
+function addDigit(digit) {
+  if (digit === "," && (currentNumber.includes(",") || !currentNumber)) return;
+
+  if (restart) {
+    currentNumber = digit;
+    restart = false;
+  } else {
+    currentNumber += digit;
+  }
+
+  updateResult();
 }
 
-// Función para calcular el resultado
-function calcular() {
-    try {
-        // Validar que el display no esté vacío antes de calcular
-        if (display.value.trim() === '') {
-            display.value = '0';
-            return;
-        }
-        // Evaluar la expresión matemática ingresada
-        const resultado = eval(display.value);
-        // Mostrar el resultado en el display
-        display.value = resultado;
-    } catch (error) {
-        // Mostrar un mensaje de error si la expresión no es válida
-        display.value = 'Error';
+function setOperator(newOperator) {
+  if (currentNumber) {
+    calculate();
+
+    firstOperand = parseFloat(currentNumber.replace(",", "."));
+    currentNumber = "";
+  }
+
+  operator = newOperator;
+}
+
+function calculate() {
+  if (operator === null || firstOperand === null) return;
+  let secondOperand = parseFloat(currentNumber.replace(",", "."));
+  let resultValue;
+
+  switch (operator) {
+    case "+":
+      resultValue = firstOperand + secondOperand;
+      break;
+    case "-":
+      resultValue = firstOperand - secondOperand;
+      break;
+    case "×":
+      resultValue = firstOperand * secondOperand;
+      break;
+    case "÷":
+      resultValue = firstOperand / secondOperand;
+      break;
+    default:
+      return;
+  }
+
+  if (resultValue.toString().split(".")[1]?.length > 5) {
+    currentNumber = parseFloat(resultValue.toFixed(5)).toString();
+  } else {
+    currentNumber = resultValue.toString();
+  }
+
+  operator = null;
+  firstOperand = null;
+  restart = true;
+  percentageValue = null;
+  updateResult();
+}
+
+function clearCalculator() {
+  currentNumber = "";
+  firstOperand = null;
+  operator = null;
+  updateResult(true);
+}
+
+function setPercentage() {
+  let result = parseFloat(currentNumber) / 100;
+
+  if (["+", "-"].includes(operator)) {
+    result = result * (firstOperand || 1);
+  }
+
+  if (result.toString().split(".")[1]?.length > 5) {
+    result = result.toFixed(5).toString();
+  }
+
+  currentNumber = result.toString();
+  updateResult();
+}
+
+buttons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const buttonText = button.innerText;
+    if (/^[0-9,]+$/.test(buttonText)) {
+      addDigit(buttonText);
+    } else if (["+", "-", "×", "÷"].includes(buttonText)) {
+      setOperator(buttonText);
+    } else if (buttonText === "=") {
+      calculate();
+    } else if (buttonText === "C") {
+      clearCalculator();
+    } else if (buttonText === "±") {
+      currentNumber = (
+        parseFloat(currentNumber || firstOperand) * -1
+      ).toString();
+      updateResult();
+    } else if (buttonText === "%") {
+      setPercentage();
     }
-}
-
+  });
+});

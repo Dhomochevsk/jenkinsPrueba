@@ -2,7 +2,7 @@ pipeline{
     agent any
     environment{
         CONTENEDOR = 'mi-contenedor-Prueba'
-        IMAGEN = 'mi-imagen-Prueba'
+        IMAGEN = 'mi-imagen-prueba'
     }
     stages{
         stage('Preparar Entorno Docker'){
